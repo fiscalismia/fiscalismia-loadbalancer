@@ -1,0 +1,23 @@
+# Ignore Docker build artifacts
+*.log
+*.pid
+
+# Ignore SSL certificates (keep out of version control)
+certs/
+*.pem
+*.key
+*.crt
+*.csr
+
+# Ignore backup files
+*.bak
+*.backup
+*~
+
+# Ignore OS-specific files
+.DS_Store
+Thumbs.db
+
+# Ignore IDE files
+.vscode/
+.idea/
