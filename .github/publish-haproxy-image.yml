@@ -1,0 +1,4 @@
+name: Fiscalismia Loadbalancer Pipeline
+
+on:
+  workflow_dispatch:
