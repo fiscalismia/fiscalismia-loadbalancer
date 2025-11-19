@@ -2,7 +2,7 @@
 # Fiscalismia-Loadbalancer HAProxy as central HTTPS Ingress for hcloud infrastructure
 #####################################################################################
 
-FROM haproxy:3.0-alpine
+FROM haproxy:3.2.8-alpine
 
 # Install additional tools for debugging and health checks
 RUN apk add --no-cache \
