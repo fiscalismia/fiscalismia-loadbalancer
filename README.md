@@ -1,11 +1,12 @@
 ## Fiscalismia HAProxy LoadBalancer
 
-Enterprise-grade HAProxy load balancer for Fiscalismia infrastructure with host-based routing and TLS passthrough capabilities to force mutual TLS (mTLS) for instances in the private network
+Enterprise-grade Layer-7 HAProxy load balancer for Fiscalismia infrastructure with host-based routing and TLS decryption & reencryption capabilities to force mutual TLS (mTLS) for instances in the private network
 
 ### Features
 
 - **Host-based routing**: Routes traffic based on domain name via Route 53 Type A Record
-- **TLS Passthrough**: Encrypted traffic forwarded without termination
+- **TLS Termination**: Encrypted traffic is terminated for header and packet analysis
+- **TLS Reencryption**: Decrypted traffic is re-encrypted and sent to backends for mTLS
 - **Health checks**: Automatic backend health monitoring
 - **Metrics export**: Real-time metrics exported to Monitoring instance
 - **Security hardened**: Minimal privileges, non-root service user, read-only filesystem
