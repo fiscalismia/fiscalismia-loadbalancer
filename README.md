@@ -47,21 +47,17 @@ This HAProxy instance serves as the central ingress point for all Fiscalismia se
 | `monitoring.fiscalismia.com` | Monitoring | `172.24.0.2` | Prometheus & Grafana dashboard |
 
 
-# TODO
 ### Local Testing
 
 ```bash
-# Clone the repository
-cd fiscalismia-loadbalancer
-
+cd ~/git/fiscalismia-loadbalancer
 # Build and start the container
 docker-compose up -d
-
 # Check logs
 docker-compose logs -f haproxy
-
+docker-compose logs --tail=100 haproxy
 # Verify configuration
-docker exec fiscalismia-loadbalancer haproxy -c -f /usr/local/etc/haproxy/haproxy.cfg
+docker exec fiscalismia-loadbalancer haproxy -c -f /usr/local/etc/haproxy.cfg
 ```
 
 ### Stats Dashboard (during development only)
@@ -83,33 +79,6 @@ HAProxy automatically monitors backend health:
 - **Recovery threshold**: 2 consecutive successes
 - **Health endpoint**: `GET /hc` (ensure backends implement this)
 
-### Logs
-
-View HAProxy logs:
-
-```bash
-# Real-time logs
-docker-compose logs -f haproxy
-
-# Last 100 lines
-docker-compose logs --tail=100 haproxy
-```
-
-### Local Testing Without Backend Services
-
-Use `docker run` to simulate backends:
-
-```bash
-# Terminal 1: Simulate frontend
-docker run -d --name test-frontend -p 8081:80 nginx
-
-# Terminal 2: Simulate backend
-docker run -d --name test-backend -p 8082:80 nginx
-
-# Update haproxy.cfg to point to localhost:8081 and localhost:8082
-# Restart HAProxy and test with curl
-curl -H "Host: fiscalismia.com" http://localhost
-```
 
 ### Testing Host-Based Routing
 
