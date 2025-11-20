@@ -61,13 +61,17 @@ docker exec fiscalismia-loadbalancer haproxy -c -f /usr/local/etc/haproxy.cfg
 ```
 
 ```bash
+# NET_BIND_SERVICE allows non-priviledged service user in container to bind to ports below 1024
+# also requires to adjust sysctl config on linux host since kernels prevent this behavior
+# this command sets it ephemerally for the session and is lost after reboot.
+# the persisted config change is added as cloud-config.loadbalancer.yml in the infrastructure repo
 podman build --no-cache -f Dockerfile -t fiscalismia-loadbalancer:latest .
-podman run  --name haproxy -d \
+podman container rm haproxy || true
+sudo sysctl net.ipv4.ip_unprivileged_port_start=80
+podman run  --name haproxy --rm \
+  --cap-add=NET_BIND_SERVICE \
   --network host \
   -v "$HOME/git/fiscalismia-loadbalancer/haproxy.cfg:/usr/local/etc/haproxy.cfg:ro,z" \
-  -p 80:80 \
-  -p 443:443 \
-  -p 8404:8404 \
   fiscalismia-loadbalancer:latest
 ```
 
