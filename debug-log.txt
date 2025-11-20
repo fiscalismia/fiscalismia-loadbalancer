@@ -1,0 +1,25 @@
+
+podman build --no-cache -f Dockerfile -t fiscalismia-loadbalancer:latest .
+podman container rm haproxy
+haproxy
+~/git/fiscalismia-loadbalancer$ podman run  --name haproxy -d \
+  --network host \
+  -v "$HOME/git/fiscalismia-loadbalancer/haproxy.cfg:/usr/local/etc/haproxy.cfg:ro,z" \
+  -p 80:80 \
+  -p 443:443 \
+  -p 8404:8404 \
+  fiscalismia-loadbalancer:latest
+Port mappings have been discarded as one of the Host, Container, Pod, and None network modes are in use
+90b1aca8ab3d7d8bde17ff94c3df127953382ceb27b1e696e2f864ed4fe1fa9e
+~/git/fiscalismia-loadbalancer$ podman ps
+CONTAINER ID  IMAGE       COMMAND     CREATED     STATUS      PORTS       NAMES
+~/git/fiscalismia-loadbalancer$ podman ps -a
+CONTAINER ID  IMAGE                                      COMMAND               CREATED        STATUS                    PORTS                      NAMES
+90b1aca8ab3d  localhost/fiscalismia-loadbalancer:latest  haproxy -f /usr/l...  5 seconds ago  Exited (1) 5 seconds ago  80/tcp, 443/tcp, 8404/tcp  haproxy
+~/git/fiscalismia-loadbalancer$ podman logs haproxy
+[NOTICE]   (1) : Initializing new worker (3)
+[NOTICE]   (3) : haproxy version is 3.2.8-9200f39
+[ALERT]    (3) : Binding [/usr/local/etc/haproxy.cfg:76] for frontend http_ingress: protocol tcpv4: cannot bind socket (Permission denied) for [0.0.0.0:80].
+[ALERT]    (3) : [haproxy.main()] Some protocols failed to start their listeners! Exiting.
+[NOTICE]   (1) : haproxy version is 3.2.8-9200f39
+[WARNING]  (1) : Failed to load worker (3) exited with code 1 (Exit)

@@ -26,7 +26,7 @@ services:
       # The ':z' flag is required on SELinux-enabled systems (like Fedora/CentOS)
       # to relabel the host directory. This allows the container to access the
       # mounted volume by applying a shared SELinux label.
-      - ./haproxy.cfg:/usr/local/etc/haproxy.cfg:ro:z
+      - ./haproxy.cfg:/usr/local/etc/haproxy.cfg:ro,z
 
     logging:
       driver: "json-file"

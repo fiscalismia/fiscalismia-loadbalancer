@@ -60,6 +60,17 @@ docker-compose logs --tail=100 haproxy
 docker exec fiscalismia-loadbalancer haproxy -c -f /usr/local/etc/haproxy.cfg
 ```
 
+```bash
+podman build --no-cache -f Dockerfile -t fiscalismia-loadbalancer:latest .
+podman run  --name haproxy -d \
+  --network host \
+  -v "$HOME/git/fiscalismia-loadbalancer/haproxy.cfg:/usr/local/etc/haproxy.cfg:ro,z" \
+  -p 80:80 \
+  -p 443:443 \
+  -p 8404:8404 \
+  fiscalismia-loadbalancer:latest
+```
+
 ### Stats Dashboard (during development only)
 
 Access real-time HAProxy statistics (replaced later with Monitoring instance):
