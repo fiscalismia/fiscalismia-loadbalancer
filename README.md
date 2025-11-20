@@ -46,18 +46,24 @@ This HAProxy instance serves as the central ingress point for all Fiscalismia se
 | `backend.demo.fiscalismia.com` | Demo | `172.20.0.2` | Encapsulated Demo instance (backend) |
 | `monitoring.fiscalismia.com` | Monitoring | `172.24.0.2` | Prometheus & Grafana dashboard |
 
+### Remote testing
+
+```bash
+cd ~/git/fiscalismia-loadbalancer/
+./scripts/deploy_latest_haproxy.sh
+```
 
 ### Local Testing
 
 ```bash
 cd ~/git/fiscalismia-loadbalancer
 # Build and start the container
-docker-compose up -d
+docker compose up -d
 # Check logs
-docker-compose logs -f haproxy
-docker-compose logs --tail=100 haproxy
+docker compose logs -f haproxy
+docker compose logs --tail=100 haproxy
 # Verify configuration
-docker exec fiscalismia-loadbalancer haproxy -c -f /usr/local/etc/haproxy.cfg
+podman exec haproxy haproxy -c -f /usr/local/etc/haproxy.cfg
 ```
 
 ```bash
@@ -71,6 +77,7 @@ sudo sysctl net.ipv4.ip_unprivileged_port_start=80
 podman run  --name haproxy --rm \
   --cap-add=NET_BIND_SERVICE \
   --network host \
+  --env-file .env \
   -v "$HOME/git/fiscalismia-loadbalancer/haproxy.cfg:/usr/local/etc/haproxy.cfg:ro,z" \
   fiscalismia-loadbalancer:latest
 ```

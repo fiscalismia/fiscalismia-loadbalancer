@@ -7,7 +7,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: fiscalismia-loadbalancer
+    container_name: haproxy
     image: fiscalismia/haproxy-loadbalancer:latest
 
     restart: unless-stopped
@@ -20,6 +20,8 @@ services:
 
     environment:
       - TZ=Europe/Berlin
+    env_file:
+      - .env
 
     volumes:
       # Mount config for hot-reload (development)
