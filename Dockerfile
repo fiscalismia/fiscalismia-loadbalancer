@@ -4,8 +4,17 @@
 
 FROM docker.io/library/haproxy:3.2.8-alpine
 
-# Copy HAProxy configuration
+# 1. Switch to root to have permission to create directories
+USER root
+
+# 2. Create the directory and ensure haproxy user owns it
+RUN mkdir -p /usr/local/etc/haproxy/errorfiles/
+RUN chown -R haproxy:haproxy /usr/local/etc/haproxy/
+
+WORKDIR /usr/local/etc/haproxy/
+
 COPY haproxy.cfg /usr/local/etc/haproxy.cfg
+COPY 503.http /usr/local/etc/haproxy/errorfiles/503.http
 
 # Validate configuration at build time
 RUN haproxy -c -f /usr/local/etc/haproxy.cfg

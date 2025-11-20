@@ -1,6 +1,7 @@
 #!/bin/bash
 
-scp .env Dockerfile haproxy.cfg root@loadbalancer:/usr/local/etc/haproxy/
+scp .env Dockerfile haproxy.cfg ./errorfiles/503.http root@loadbalancer:/usr/local/etc/haproxy/
+
 ssh root@loadbalancer "
   cd /usr/local/etc/haproxy/
 
@@ -22,4 +23,6 @@ ssh root@loadbalancer "
     --env-file .env \
     -v "/usr/local/etc/haproxy/haproxy.cfg:/usr/local/etc/haproxy.cfg:ro,z" \
     fiscalismia-loadbalancer:latest
+
+    podman logs --follow haproxy
 "
