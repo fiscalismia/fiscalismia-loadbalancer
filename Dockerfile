@@ -11,14 +11,11 @@ RUN apk add --no-cache \
     vim \
     && rm -rf /var/cache/apk/*
 
-# Create necessary directories
-RUN mkdir -p /usr/local/etc/haproxy
-
 # Copy HAProxy configuration
-COPY haproxy.cfg /usr/local/etc/haproxy/haproxy.cfg
+COPY haproxy.cfg /usr/local/etc/haproxy.cfg
 
 # Validate configuration at build time
-RUN haproxy -c -f /usr/local/etc/haproxy/haproxy.cfg
+RUN haproxy -c -f /usr/local/etc/haproxy.cfg
 
 # Expose ports
 # 80  - HTTP - TODO Remove after Development concludes
@@ -34,4 +31,4 @@ HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
 USER haproxy
 
 # Use exec form to ensure proper signal handling
-CMD ["haproxy", "-f", "/usr/local/etc/haproxy/haproxy.cfg"]
+CMD ["haproxy", "-f", "/usr/local/etc/haproxy.cfg"]
