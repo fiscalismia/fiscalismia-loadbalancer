@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 scp .env Dockerfile haproxy.cfg ./errorfiles/503.http root@loadbalancer:/usr/local/etc/haproxy/
 
