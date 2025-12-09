@@ -1,0 +1,71 @@
+#!/usr/bin/env bash
+
+REMOTE_DIR=/root/tls_listener
+
+# create unattended config file for certificate signing request
+cat << 'EOF' > /tmp/unattended_csd.cnf
+[ req ]
+prompt = no
+distinguished_name = dn_req
+
+[ dn_req ]
+countryName = DE
+stateOrProvinceName = Berlin
+localityName = Berlin
+organizationName = Fiscalismia Test
+organizationalUnitName = IT
+commonName = fiscalismia.com
+emailAddress = noreply@fiscalismia.com
+
+[ v3_req ]
+subjectAltName = @alt_names
+
+[ alt_names ]
+DNS.1 = fiscalismia.com
+DNS.2 = *.fiscalismia.com
+EOF
+
+# create remote directory
+ssh loadbalancer "mkdir -p $REMOTE_DIR"
+
+# copy unattended config to target machine
+scp /tmp/unattended_csd.cnf loadbalancer:$REMOTE_DIR/
+
+# remove unattended config from source machine
+rm -f /tmp/unattended_csd.cnf
+
+# kill any existing listeners
+ssh loadbalancer << 'EOF'
+netstat -ltnp | awk '/:443/ {split($7, a, "/"); print a[1]}' | grep -v '^-' | xargs -r kill
+EOF
+
+# create openssl certs
+ssh loadbalancer << EOF
+cd $REMOTE_DIR
+
+# generate private key with ECDSA algorithm
+openssl genpkey -outform PEM -algorithm EC -pkeyopt ec_paramgen_curve:secp521r1 -out pkey.pem
+
+# generate a certificate signing request for a CA or yourself leaving most info blank (= a single dot)
+openssl req -new -config $REMOTE_DIR/unattended_csd.cnf -key pkey.pem -out ca_req.csr
+
+# self sign tls certificate with SAN and CSR
+openssl x509 -req -days 365 -in ca_req.csr -signkey pkey.pem -out self_signed.crt \
+  -extfile $REMOTE_DIR/unattended_csd.cnf -extensions v3_req
+EOF
+
+# start openssl server in debugmode
+ssh loadbalancer "
+# start tls listener able to decrypt incoming https requests
+cd $REMOTE_DIR
+openssl s_server \
+  -accept 443 \
+  -key pkey.pem \
+  -cert self_signed.crt \
+  -WWW \
+  -state
+
+  # -tlsextdebug \
+  # -msg \
+  # -debug \
+"
