@@ -1,12 +1,12 @@
 ## Fiscalismia HAProxy LoadBalancer
 
-Enterprise-grade Layer-7 HAProxy load balancer for Fiscalismia infrastructure with host-based routing and TLS decryption & reencryption capabilities to force mutual TLS (mTLS) for instances in the private network
+Enterprise-grade Layer-4 HAProxy load balancer for Fiscalismia infrastructure with Server Name Indication TLS extention based routing and TLS passthrough of binary TCP packets, with Proxy Protocol V2 headers prepended to the binary stream in order to preserve the original source ip, which can then be extracted by the endpoints via nginx reverse proxy configuration and exposed as HTTP forwarded and forwarded for http headers.
 
 ### Features
 
-- **Host-based routing**: Routes traffic based on domain name via Route 53 Type A Record
-- **TLS Termination**: Encrypted traffic is terminated for header and packet analysis
-- **TLS Reencryption**: Decrypted traffic is re-encrypted and sent to backends for mTLS
+- **SNI-based routing**: Routes traffic based on TLS certificate's SNI
+- **TLS Passthrough**: Encrypted traffic is sent through as binary TCP packets
+- **Proxy Protocol V2**: Prepends proxy protocol headers to binary tcp stream to preserve client ip.
 - **Health checks**: Automatic backend health monitoring
 - **Metrics export**: Real-time metrics exported to Monitoring instance
 - **Security hardened**: Minimal privileges, non-root service user, read-only filesystem
@@ -88,8 +88,8 @@ Access real-time HAProxy statistics (replaced later with Monitoring instance):
 
 ```
 URL: http://<loadbalancer-ip>:8404/stats
-Username: admin
-Password: changeme123  # TODO: Replace with .env var or secret from pipeline
+Username: save in .env
+Password: save in .env
 ```
 
 ### Health Checks
@@ -99,19 +99,6 @@ HAProxy automatically monitors backend health:
 - **Interval**: Every 10 seconds
 - **Failure threshold**: 3 consecutive failures
 - **Recovery threshold**: 2 consecutive successes
-- **Health endpoint**: `GET /hc` (ensure backends implement this)
-
-
-### Testing Host-Based Routing
-
-```bash
-# Test each domain
-curl -H "Host: fiscalismia.com" http://localhost
-curl -H "Host: backend.fiscalismia.com" http://localhost
-curl -H "Host: demo.fiscalismia.com" http://localhost
-curl -H "Host: backend.demo.fiscalismia.com" http://localhost
-curl -H "Host: monitoring.fiscalismia.com" http://localhost
-```
 
 ## Additional Resources
 
