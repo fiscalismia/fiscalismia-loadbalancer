@@ -21,6 +21,10 @@ jobs:
     - name: Checkout SCM
       uses: actions/checkout@v5
 
+    - name: Prepare Workspace
+      run: |
+        cp ${GITHUB_WORKSPACE}/errorfiles/503.http ${GITHUB_WORKSPACE}/503.http
+
     - name: Buildah Image Creation
       id: build-image
       uses: redhat-actions/buildah-build@v2.13
