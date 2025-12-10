@@ -10,12 +10,13 @@ on:
       - main
 
 jobs:
-  buildah-build:
+  build-and-publish-image:
     runs-on: ubuntu-latest
 
     permissions:
       contents: read
       actions: read
+      packages: write # to publish to ghcr.io
 
     steps:
     - name: Checkout SCM
