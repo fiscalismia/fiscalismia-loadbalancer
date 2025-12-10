@@ -2,6 +2,14 @@
 
 REMOTE_DIR=/root/tls_listener
 
+if [[ -z "$1" ]]; then
+  echo "Error: Usage as follows:"
+  echo "$0 <SSH_ALIAS>"
+  exit 1
+else
+  echo "##### Starting TLS Lstnr (Port 443) on [$1] instance #####"
+fi
+
 # create unattended config file for certificate signing request
 cat << 'EOF' > /tmp/unattended_csd.cnf
 [ req ]
@@ -22,25 +30,28 @@ subjectAltName = @alt_names
 
 [ alt_names ]
 DNS.1 = fiscalismia.com
-DNS.2 = *.fiscalismia.com
+DNS.2 = backend.fiscalismia.com
+DNS.3 = demo.fiscalismia.com
+DNS.4 = backend.demo.fiscalismia.com
+DNS.5 = monitoring.fiscalismia.com
 EOF
 
 # create remote directory
-ssh loadbalancer "mkdir -p $REMOTE_DIR"
+ssh $1 "mkdir -p $REMOTE_DIR"
 
 # copy unattended config to target machine
-scp /tmp/unattended_csd.cnf loadbalancer:$REMOTE_DIR/
+scp /tmp/unattended_csd.cnf $1:$REMOTE_DIR/
 
 # remove unattended config from source machine
 rm -f /tmp/unattended_csd.cnf
 
 # kill any existing listeners
-ssh loadbalancer << 'EOF'
+ssh $1 << 'EOF'
 netstat -ltnp | awk '/:443/ {split($7, a, "/"); print a[1]}' | grep -v '^-' | xargs -r kill
 EOF
 
 # create openssl certs
-ssh loadbalancer << EOF
+ssh $1 << EOF
 cd $REMOTE_DIR
 
 # generate private key with ECDSA algorithm
@@ -55,7 +66,7 @@ openssl x509 -req -days 365 -in ca_req.csr -signkey pkey.pem -out self_signed.cr
 EOF
 
 # start openssl server in debugmode
-ssh loadbalancer "
+ssh $1 "
 # start tls listener able to decrypt incoming https requests
 cd $REMOTE_DIR
 openssl s_server \
