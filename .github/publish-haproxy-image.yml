@@ -1,4 +1,63 @@
 name: Fiscalismia Loadbalancer Pipeline
 
 on:
-  workflow_dispatch:
+  push:
+    branches:
+      - main
+      - pipeline_testing
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  buildah-build:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      actions: read
+
+    steps:
+    - name: Checkout SCM
+      uses: actions/checkout@v5
+
+    - name: Buildah Image Creation
+      id: build-image
+      uses: redhat-actions/buildah-build@v2.13
+      # https://github.com/redhat-actions/buildah-build/releases
+      with:
+        image: fiscalismia-loadbalancer
+        tags: latest ${{ github.sha }}
+        containerfiles: |
+          ./Dockerfile
+        # build-args: |
+        #   some_arg=some_value
+
+    - name: Log in to Github Container Registry
+      if: github.event_name == 'push'
+      uses: redhat-actions/podman-login@v1.7
+      # https://github.com/redhat-actions/podman-login/releases
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Push to Github Container Registry
+      if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+      id: push-to-ghcr
+      uses: redhat-actions/push-to-registry@v2.8
+      # https://github.com/redhat-actions/push-to-registry/releases
+      with:
+        image: ${{ steps.build-image.outputs.image }}
+        tags: ${{ steps.build-image.outputs.tags }}
+        registry: ghcr.io/fiscalismia
+
+    - name: Print image url
+      if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+      run: echo "Image pushed to ${{ steps.push-to-ghcr.outputs.registry-paths }}"
+
+    - name: Print build success (PR)
+      if: github.event_name == 'pull_request'
+      run: |
+        echo "Build successful for PR"
+        echo "Image would be: ${{ steps.build-image.outputs.image }}:${{ steps.build-image.outputs.tags }}"
