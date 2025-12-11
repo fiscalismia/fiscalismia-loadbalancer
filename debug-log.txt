@@ -1,25 +1,343 @@
+my demo instance is running a openssl listener with a self singned cert and a netcat listener on port 80
 
-podman build --no-cache -f Dockerfile -t fiscalismia-loadbalancer:latest .
-podman container rm haproxy
-haproxy
-~/git/fiscalismia-loadbalancer$ podman run  --name haproxy -d \
-  --network host \
-  -v "$HOME/git/fiscalismia-loadbalancer/haproxy.cfg:/usr/local/etc/haproxy.cfg:ro,z" \
-  -p 80:80 \
-  -p 443:443 \
-  -p 8404:8404 \
-  fiscalismia-loadbalancer:latest
-Port mappings have been discarded as one of the Host, Container, Pod, and None network modes are in use
-90b1aca8ab3d7d8bde17ff94c3df127953382ceb27b1e696e2f864ed4fe1fa9e
-~/git/fiscalismia-loadbalancer$ podman ps
-CONTAINER ID  IMAGE       COMMAND     CREATED     STATUS      PORTS       NAMES
-~/git/fiscalismia-loadbalancer$ podman ps -a
-CONTAINER ID  IMAGE                                      COMMAND               CREATED        STATUS                    PORTS                      NAMES
-90b1aca8ab3d  localhost/fiscalismia-loadbalancer:latest  haproxy -f /usr/l...  5 seconds ago  Exited (1) 5 seconds ago  80/tcp, 443/tcp, 8404/tcp  haproxy
-~/git/fiscalismia-loadbalancer$ podman logs haproxy
-[NOTICE]   (1) : Initializing new worker (3)
-[NOTICE]   (3) : haproxy version is 3.2.8-9200f39
-[ALERT]    (3) : Binding [/usr/local/etc/haproxy.cfg:76] for frontend http_ingress: protocol tcpv4: cannot bind socket (Permission denied) for [0.0.0.0:80].
-[ALERT]    (3) : [haproxy.main()] Some protocols failed to start their listeners! Exiting.
-[NOTICE]   (1) : haproxy version is 3.2.8-9200f39
-[WARNING]  (1) : Failed to load worker (3) exited with code 1 (Exit)
+netstat -ltnp | grep -E '443|80'tcp        0      0 0.0.0.0:80              0.0.0.0:*               LISTEN      5143/nc             tcp6       0      0 :::443                  :::*                    LISTEN      5022/openssl  
+
+[root@Fiscalismia-Demo ~]# hostname -I
+
+172.20.0.2 
+
+
+However my haproxy loadbalancer is still giving layer 4 timeouts and the health checks are not reaching the listeners and i do not understand why.
+
+perhaps haproxy is not using outbound port 443 or port 80 to communicate with the target instances since only these are allowed for egress in nftables firewall
+
+
+[WARNING]  (3) : Server fiscalismia_demo_frontend/demo_frontend01 is DOWN, reason: Layer4 timeout, check duration: 10004ms. 0 active and 0 backup servers left. 0 sessions active, 0 requeued, 0 remaining in queue.
+
+[ALERT]    (3) : backend 'fiscalismia_demo_frontend' has no server available!
+
+Server fiscalismia_demo_backend/demo_backend01 is DOWN, reason: Layer4 timeout, check duration: 10005ms. 0 active and 0 backup servers left. 0 sessions active, 0 requeued, 0 remaining in queue.
+
+backend fiscalismia_demo_backend has no server available!
+
+[WARNING]  (3) : Server fiscalismia_demo_backend/demo_backend01 is DOWN, reason: Layer4 timeout, check duration: 10005ms. 0 active and 0 backup servers left. 0 sessions active, 0 requeued, 0 remaining in queue.
+
+[ALERT]    (3) : backend 'fiscalismia_demo_backend' has no server available!
+
+
+
+haproxy config:
+
+
+```
+
+###########################################################################################
+
+# Fiscalismia-Loadbalancer HAProxy as central Layer 4 TCP Ingress for hcloud infrastructure
+
+#
+
+# Host-Based-Routing in Private Network:
+
+#   - monitoring.fiscalismia.com         -> Monitoring    (172.24.0.2)
+
+#   - fiscalismia.com                    -> Frontend      (172.24.0.3)
+
+#   - backend.fiscalismia.com            -> Backend       (172.24.0.4)
+
+#   - demo.fiscalismia.com               -> Demo Frontend (172.20.0.2)
+
+#   - backend.demo.fiscalismia.com       -> Demo Backend  (172.20.0.2)
+
+
+# Uses Server Name Indication as part of the TLS protocol for identifying dns routes
+
+# Uses PROXY Protocol v2 prepending headers to TCP packets for source address preservation
+
+# ┌──────────────────────────────────────────────────────────────────────────────┐
+
+# │                         TCP Connection                                       │
+
+# ├───────────────────────┬──────────────────────────────────────────────────────┤
+
+# │   PROXY Protocol v2   │              Original TLS Stream                     │
+
+# │       Header          │                                                      │
+
+# │    (first bytes)      │  TLS ClientHello │ TLS ServerHello │ Encrypted HTTP  │
+
+# └───────────────────────┴──────────────────────────────────────────────────────┘
+
+#          │                                          │
+
+#          ▼                                          ▼
+
+# ┌─────────────────────────────┐          ┌─────────────────────────┐
+
+# │ Binary header containing:   │          │ Untouched TLS stream    │
+
+# │ - Signature (12 bytes)      │          │ passed to TLS library   │
+
+# │ - Version/Command           │          │ for decryption          │
+
+# │ - Protocol (TCP4/TCP6)      │          └─────────────────────────┘
+
+# │ - Address length            │
+
+# │ - Source IP: 203.0.113.42   │  ◄── Client IP preservation
+
+# │ - Dest IP: 1.2.3.4          │
+
+# │ - Source Port: 54321        │
+
+# │ - Dest Port: 443            │
+
+# └─────────────────────────────┘
+
+###########################################################################################
+
+
+# Process-wide security and performance tunings affecting HAProxy at a low-level
+
+global
+
+    # Maximum simultaneous connections to limit memory consumption
+
+    maxconn 4096
+
+
+    # Logging: Send logs to stdout in raw format at info level, exposing docker container logs in live tail
+
+    log stdout format raw local0 info
+
+
+    # Run as daemon: Forks into background after startup (production mode)
+
+    # Disable this for debugging or when running in Docker foreground
+
+    # TODO enable in prod
+
+    # daemon
+
+
+    # Non-root service user as security best-practice
+
+    user haproxy
+
+    group haproxy
+
+
+defaults
+
+
+    # Inherit logging configuration from global section
+
+    log     global
+
+    # Layer 4 TLS Passthrough of binary TCP packets
+
+    mode    tcp
+
+    # Defines the log format, the default being:
+
+    # option tcplog
+
+    log-format "%ci:%cp [%t] %ft %b/%s %Tw/%Tc/%Tt %B %ts %ac/%fc/%bc/%sc/%rc %sq/%bq"
+
+
+    ##### CONNECTION SETTINGS #####
+
+    # Number of connection retry attempts before giving up
+
+    retries 3
+
+    # Time to wait for connections to the backend servers to establish
+
+    timeout connect 10s
+
+    # Inactivity time on client side before closing connection
+
+    timeout client  30s
+
+    # Inactivity time on server side before closing connection
+
+    timeout server  30s
+
+    # TCP specific long-lived sessions for e.g. ETL data processing
+
+    timeout tunnel 5m
+
+
+    ##### DEFAULT BACKEND SERVER CONFIG #####
+
+    # - check: Enable health checks
+
+    # - inter: Check interval (every 10 seconds)
+
+    # - fall:  Mark server as down after 3 failed checks
+
+    # - rise:  Mark server as up after 2 successful checks
+
+    default-server check inter 10s fall 3 rise 2
+
+
+#######################################################################
+
+# FRONTEND - HTTP (Port 80) Redirect to HTTPS (443)
+
+#######################################################################
+
+frontend http_ingress
+
+    bind *:80
+
+    mode http
+
+
+    # Allowed new connections per second
+
+    rate-limit sessions 128
+
+
+    # Redirect all HTTP to HTTPS
+
+    http-request redirect scheme https code 301
+
+
+#######################################################################
+
+# FRONTEND - HTTPS (Port 443) TLS Passthrough with SNI Routing
+
+#######################################################################
+
+frontend https_ingress
+
+    bind *:443
+
+    mode tcp
+
+
+    # Wait for TLS ClientHello to read SNI
+
+    tcp-request inspect-delay 5s
+
+
+    ##### RATE LIMITING #####
+
+    # Tracks connections per ip address in a sliding window
+
+    # If concurrent connections over the conn_rate window are exceeded,
+
+    # then we silently drop the tcp connection leading to timeouts for the attacker.
+
+    stick-table type ip size 500k expire 60s store conn_rate(3s)
+
+    tcp-request connection track-sc0 src
+
+    tcp-request content silent-drop if { src_conn_rate(https_ingress) ge 50 }
+
+
+    # TLS SNI (Server Name Indication) based routing
+
+    acl is_demo_frontend req_ssl_sni -i demo.fiscalismia.com
+
+    acl is_demo_backend req_ssl_sni -i backend.demo.fiscalismia.com
+
+    acl is_monitoring req_ssl_sni -i monitoring.fiscalismia.com
+
+    acl is_main_frontend req_ssl_sni -i fiscalismia.com
+
+    acl is_main_backend req_ssl_sni -i backend.fiscalismia.com
+
+
+    # when no SNI based rules are matched, immediately drop traffic silently.
+
+    # silent-drop slows down attackers by producing timeouts instead of serving immediate rejection messages.
+
+    # dropping content still shows in the logs, see https://www.haproxy.com/documentation/haproxy-configuration-tutorials/security/traffic-policing/#reject-a-tcp-connection
+
+    acl valid_sni req_ssl_sni -i demo.fiscalismia.com backend.demo.fiscalismia.com monitoring.fiscalismia.com fiscalismia.com backend.fiscalismia.com
+
+    tcp-request content silent-drop if !valid_sni
+
+
+    use_backend fiscalismia_demo_frontend if is_demo_frontend
+
+    use_backend fiscalismia_demo_backend if is_demo_backend
+
+    use_backend fiscalismia_monitoring if is_monitoring
+
+    use_backend fiscalismia_frontend if is_main_frontend
+
+    use_backend fiscalismia_backend if is_main_backend
+
+
+#######################################################################
+
+# Backend - HTTPS with Proxy Protocol V2
+
+#######################################################################
+
+backend fiscalismia_frontend
+
+    balance roundrobin
+
+    server frontend01 172.24.0.3:443 send-proxy-v2 check
+
+
+backend fiscalismia_demo_frontend
+
+    balance roundrobin
+
+    # TODO addd proxy-protocol
+
+    server demo_frontend01 172.20.0.2:443 check
+
+
+backend fiscalismia_demo_backend
+
+    balance roundrobin
+
+    # TODO change port and add proxy protocol
+
+    server demo_backend01 172.20.0.2:80 check
+
+
+backend fiscalismia_monitoring
+
+    balance roundrobin
+
+    server monitoring01 172.24.0.2:443 send-proxy-v2 check
+
+
+backend fiscalismia_backend
+
+    balance roundrobin
+
+    server backend01 172.24.0.4:443 send-proxy-v2 check
+
+
+#################################################################
+
+# STATS PAGE (Optional - for monitoring)
+
+#################################################################
+
+listen stats
+
+    bind *:8404
+
+    mode http
+
+    stats enable
+
+    stats uri /stats
+
+    stats refresh 10s
+
+    stats show-legends
+
+    stats auth "${STATS_USERNAME}":"${STATS_PASSWORD}"
+
+
+```
