@@ -21,6 +21,8 @@ podman run \
   --name demo \
   --detach \
   --rm \
+  --cap-add=NET_BIND_SERVICE \
+  --network host \
   -p 443:443 \
   fiscalismia-demo:latest
 
