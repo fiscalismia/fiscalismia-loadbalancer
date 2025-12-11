@@ -1,6 +1,7 @@
 my demo instance is running an nginx reverse proxy on port 443 as a container listening
 it uses proxy protocol to preserve source ip and read it
 
+demo debugging:
 [root@Fiscalismia-Demo ~]# hostname -I
 172.20.0.2
 [root@Fiscalismia-Demo ~]# netstat -ltnp | grep 443
@@ -9,6 +10,37 @@ tcp        0      0 0.0.0.0:443             0.0.0.0:*               LISTEN      
 Ncat: Version 7.92 ( https://nmap.org/ncat )
 Ncat: Connected to 127.0.0.1:443.
 Ncat: 0 bytes sent, 0 bytes received in 0.03 seconds.
+
+loadbalancer debugging:
+# when nginx is up:
+[root@Fiscalismia-LoadBalancer ~]# nc -v4 172.20.0.2 443
+Ncat: Version 7.92 ( https://nmap.org/ncat )
+Ncat: TIMEOUT.
+# when no nginx docker container is running:
+nc -v4 172.20.0.2 443
+Ncat: Version 7.92 ( https://nmap.org/ncat )
+Ncat: Connection refused.
+# when demo server had "python3 -m http.server 443" running
+curl 172.20.0.2:443
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Directory listing for /</title>
+</head>
+<body>
+<h1>Directory listing for /</h1>
+<hr>
+<ul>
+</ul>
+<hr>
+</body>
+</html>
+nc -vz4 172.20.0.2 443
+Ncat: Version 7.92 ( https://nmap.org/ncat )
+Ncat: Connected to 172.20.0.2:443.
+Ncat: 0 bytes sent, 0 bytes received in 0.03 seconds.
+
 
 
 However my haproxy loadbalancer is still giving layer 4 timeouts and the health checks are not reaching the listeners and i do not understand why.
