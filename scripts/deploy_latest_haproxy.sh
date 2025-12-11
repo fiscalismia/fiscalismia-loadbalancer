@@ -2,7 +2,20 @@
 
 scp .env Dockerfile haproxy.cfg ./errorfiles/503.http root@loadbalancer:/usr/local/etc/haproxy/
 
-ssh root@loadbalancer "
+# giving loadbalancer temporary internet access until reboot for pulling haproxy image
+# ssh loadbalancer << 'EOF'
+# timeout 2 curl -s ifconfig.me
+# exit_code=$?
+# # only execute if curl times out
+# if (( $exit_code > 0 )); then
+#   printf "\nSetting up ephemeral internet access via NAT GW\n"
+#   /root/scripts/nat_gw_ephemeral_public_egress.sh 172.24.1.3
+# else
+#   printf "\nInternet Access already setup. Continue.\n"
+# fi
+# EOF
+
+ssh loadbalancer << EOF
   cd /usr/local/etc/haproxy/
 
   podman build --no-cache \
@@ -25,4 +38,4 @@ ssh root@loadbalancer "
     fiscalismia-loadbalancer:latest
 
     podman logs --follow haproxy
-"
+EOF
