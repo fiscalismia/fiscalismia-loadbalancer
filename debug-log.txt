@@ -1,3 +1,7 @@
+echo -e "PROXY TCP4 127.0.0.1 127.0.0.1 12345 443\r\n" | nc -v4 172.20.0.2 443
+
+    option tcp-check
+    tcp-check send-proxy-v2
 my demo instance is running an nginx reverse proxy on port 443 as a container listening
 it uses proxy protocol to preserve source ip and read it
 
