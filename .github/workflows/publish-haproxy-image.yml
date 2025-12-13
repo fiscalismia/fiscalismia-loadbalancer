@@ -53,7 +53,7 @@ jobs:
           org.opencontainers.image.created=${{ env.BUILD_TIMESTAMP }}
           org.opencontainers.image.source=${{ github.repositoryUrl }}
           org.opencontainers.image.revision=${{ github.sha }}
-          org.opencontainers.image.description="Enterprise-grade Layer-4 HAProxy load balancer for Fiscalismia infrastructure with Server Name Indication TLS extention based routing and TLS passthrough of binary TCP packets, with Proxy Protocol V2 headers prepended to the binary stream in order to preserve the original source ip, which can then be extracted by the endpoints via nginx reverse proxy configuration and exposed as HTTP forwarded and forwarded for http headers."
+          org.opencontainers.image.description=Enterprise-grade Layer-4 HAProxy load balancer for Fiscalismia infrastructure with Server Name Indication TLS extention based routing and TLS passthrough of binary TCP packets, with Proxy Protocol V2 headers prepended to the binary stream in order to preserve the original source ip, which can then be extracted by the endpoints via nginx reverse proxy configuration and exposed as HTTP forwarded and forwarded for http headers.
           org.opencontainers.image.licenses=MIT
 
     - name: Log in to Github Container Registry
