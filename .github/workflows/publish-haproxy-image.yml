@@ -43,7 +43,7 @@ jobs:
       # https://github.com/redhat-actions/buildah-build/releases
       with:
         image: fiscalismia-loadbalancer
-        tags: latest ${{ github.sha }}
+        tags: latest ${{ env.BUILD_VERSION }}
         containerfiles: |
           ./Dockerfile
         # build-args: |
