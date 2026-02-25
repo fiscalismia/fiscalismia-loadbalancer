@@ -1,0 +1,14 @@
+# Workflows
+.github/workflows
+
+.git
+.vscode
+
+#Snyk
+.dccache
+
+# dotenv environment variables file
+.env
+
+# python venv
+.venv
