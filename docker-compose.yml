@@ -37,7 +37,7 @@ services:
         max-file: "3"
 
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8404/stats"]
+      test: ["CMD", "curl", "-f", "http://127.0.0.1:8404/stats"]
       interval: 30s
       timeout: 5s
       retries: 3
