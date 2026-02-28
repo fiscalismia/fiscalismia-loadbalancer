@@ -31,9 +31,11 @@ subjectAltName = @alt_names
 [ alt_names ]
 DNS.1 = fiscalismia.com
 DNS.2 = backend.fiscalismia.com
-DNS.3 = demo.fiscalismia.com
-DNS.4 = backend.demo.fiscalismia.com
-DNS.5 = monitoring.fiscalismia.com
+DNS.3 = fastapi.fiscalismia.com
+DNS.4 = demo.fiscalismia.com
+DNS.5 = backend.demo.fiscalismia.com
+DNS.6 = fastapi.demo.fiscalismia.com
+DNS.7 = monitoring.fiscalismia.com
 EOF
 
 # create remote directory

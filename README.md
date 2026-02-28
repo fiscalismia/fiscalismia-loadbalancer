@@ -40,10 +40,12 @@ This HAProxy instance serves as the central ingress point for all Fiscalismia se
 
 | Domain | Target Service | Private IP | Description |
 |--------|---------------|------------|-------------|
-| `fiscalismia.com` | Frontend | `172.24.0.3` | Main Fiscalismia Frontend |
-| `backend.fiscalismia.com` | Backend | `172.24.0.4` | Main REST API backend |
+| `fiscalismia.com` | Frontend | `172.24.0.3` | React Fiscalismia Frontend |
+| `backend.fiscalismia.com` | Backend | `172.24.0.4` | Express REST API backend |
+| `fastapi.fiscalismia.com` | FastAPI | `172.24.0.4` | Python FastAPI backend |
 | `demo.fiscalismia.com` | Demo | `172.20.0.2` | Encapsulated Demo instance (frontend) |
 | `backend.demo.fiscalismia.com` | Demo | `172.20.0.2` | Encapsulated Demo instance (backend) |
+| `fastapi.demo.fiscalismia.com` | Demo | `172.20.0.2` | Encapsulated Demo instance (fastapi) |
 | `monitoring.fiscalismia.com` | Monitoring | `172.24.0.2` | Prometheus & Grafana dashboard |
 
 ### Remote testing
