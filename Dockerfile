@@ -2,7 +2,7 @@
 # Fiscalismia-Loadbalancer HAProxy as central HTTPS Ingress for hcloud infrastructure
 #####################################################################################
 
-FROM docker.io/library/haproxy:3.2.8-alpine
+FROM docker.io/library/haproxy:3.2.13-alpine
 
 # 1. Switch to root to have permission to create directories
 USER root
