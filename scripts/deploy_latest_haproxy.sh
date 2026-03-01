@@ -40,5 +40,6 @@ ssh loadbalancer << EOF
     -v "/usr/local/etc/haproxy/haproxy.cfg:/usr/local/etc/haproxy.cfg:ro,z" \
     fiscalismia-loadbalancer:latest
 
-    podman logs --follow haproxy
+    # colorized logging
+    /root/scripts/colorized-haproxy-logging.sh
 EOF
