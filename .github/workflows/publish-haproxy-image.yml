@@ -76,12 +76,6 @@ jobs:
       if: github.event_name == 'push' && github.ref == 'refs/heads/main'
       run: echo "Image pushed to ${{ steps.push-to-ghcr.outputs.registry-paths }}"
 
-    - name: Print build success (PR)
-      if: github.event_name == 'pull_request'
-      run: |
-        echo "Build successful for PR"
-        echo "Image would be: ${{ steps.build-image.outputs.image }}:${{ steps.build-image.outputs.tags }}"
-
   snyk-container-scan:
     needs: build-and-publish-image
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
