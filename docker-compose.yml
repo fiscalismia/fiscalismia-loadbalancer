@@ -7,6 +7,7 @@ services:
     container_name: haproxy
     image: ghcr.io/fiscalismia/fiscalismia-loadbalancer:latest
     pull_policy: always
+    # when systemd/system/podman-restart.service is enabled, it only restarts containers after reboot if they have the always policy
     restart: always
     # Network mode: host to access both private network interfaces and the public network interface
     # - HAProxy sees real client IPs at Layer 4 before it even touches TLS for rate limiting (track-sc0 src, src_conn_rate)
