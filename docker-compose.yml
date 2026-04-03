@@ -8,7 +8,9 @@ services:
     image: ghcr.io/fiscalismia/fiscalismia-loadbalancer:latest
     pull_policy: always
     restart: unless-stopped
-    # Network mode: host to access private network interfaces
+    # Network mode: host to access both private network interfaces and the public network interface
+    # - HAProxy sees real client IPs at Layer 4 before it even touches TLS for rate limiting (track-sc0 src, src_conn_rate)
+    # - locked down nftables input/output/forward chains apply without any Podman-injected NAT rules undermining them
     # In production on Hetzner VPS, this allows HAProxy to bind to:
     # - Public IP for incoming HTTPS traffic
     # - Private IPs (172.20.1.3 and 172.24.1.3) for backend routing
@@ -23,8 +25,8 @@ services:
     healthcheck:
       # to avoid spamming the access logs only run a simple tcp healthcheck
       test: ["CMD-SHELL", "nc -z 127.0.0.1 443" ]
-      start_period: 0s
-      interval: 5s
+      start_period: 10s
+      interval: 30s
       timeout: 5s
       retries: 5
     # Container Resource Usage
