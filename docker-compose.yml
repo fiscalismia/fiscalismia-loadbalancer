@@ -24,7 +24,7 @@ services:
         max-file: "3"
     healthcheck:
       # to avoid spamming the access logs only run a simple tcp healthcheck
-      test: ["CMD-SHELL", "nc -z 127.0.0.1 443" ]
+      test: ["CMD-SHELL", "wget -qO /dev/null http://127.0.0.1:8405/health" ]
       start_period: 10s
       interval: 30s
       timeout: 5s
