@@ -15,11 +15,6 @@ services:
     network_mode: host
     environment:
       - TZ=Europe/Berlin
-    volumes:
-      # The ':z' flag is required on SELinux-enabled systems (like Fedora/CentOS)
-      # to relabel the host directory. This allows the container to access the
-      # mounted volume by applying a shared SELinux label.
-      - ./haproxy.cfg:/usr/local/etc/haproxy.cfg:ro,z
     logging:
       driver: "json-file"
       options:
@@ -27,7 +22,7 @@ services:
         max-file: "3"
     healthcheck:
       # to avoid spamming the access logs only run a simple tcp healthcheck
-      test: ["CMD-SHELL", "python -c \"import socket; socket.create_connection(('127.0.0.1', 443), timeout=3)\"" ]
+      test: ["CMD-SHELL", "nc -z 127.0.0.1 443" ]
       start_period: 0s
       interval: 5s
       timeout: 5s
