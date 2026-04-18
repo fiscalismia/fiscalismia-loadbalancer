@@ -28,9 +28,9 @@ Enterprise-grade Layer-4 HAProxy load balancer for Fiscalismia infrastructure wi
 | `golang.demo.fiscalismia.com` | Demo | `172.20.0.2` | `8445` | Golang Unified Healthcheck API |
 | `fiscalismia.com` | Production | `172.24.0.3` | `443` | TypeScript React Dashboard |
 | `backend.fiscalismia.com` | Production | `172.24.0.4` | `443` | TypeScript Express REST API |
-| `fastapi.fiscalismia.com` | Production | `172.24.0.4` | `8443` | Python FastAPI Webscraper |
+| `fastapi.fiscalismia.com` | Production | `172.24.0.4` | `8444` | Python FastAPI Webscraper |
 | `monitoring.fiscalismia.com` | Production | `172.24.0.2` | `443` | Prometheus & Grafana Dashboard |
-| `golang.monitoring.fiscalismia.com` | Production | `172.24.0.2` | `8443` | Golang Unified Healthcheck API |
+| `golang.monitoring.fiscalismia.com` | Production | `172.24.0.2` | `8445` | Golang Unified Healthcheck API |
 
 ### Architecture Overview
 
