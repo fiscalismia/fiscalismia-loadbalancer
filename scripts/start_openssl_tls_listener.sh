@@ -35,7 +35,9 @@ DNS.3 = fastapi.fiscalismia.com
 DNS.4 = demo.fiscalismia.com
 DNS.5 = backend.demo.fiscalismia.com
 DNS.6 = fastapi.demo.fiscalismia.com
-DNS.7 = monitoring.fiscalismia.com
+DNS.7 = golang.demo.fiscalismia.com
+DNS.8 = monitoring.fiscalismia.com
+DNS.9 = golang.monitoring.fiscalismia.com
 EOF
 
 # create remote directory

@@ -18,6 +18,20 @@ Enterprise-grade Layer-4 HAProxy load balancer for Fiscalismia infrastructure wi
 - Loadbalancer instance attached to Hetzner private networks via private network interface
 - Domains pointing to the loadbalancer's public IP via Type A Record
 
+### Loadbalancer Routing Map
+
+| Domain | Environment | Private IP | Port | Description |
+|--------|------------|------|-------------|-------------|
+| `demo.fiscalismia.com` | Demo | `172.20.0.2` | `443` | TypeScript React Dashboard |
+| `backend.demo.fiscalismia.com` | Demo | `172.20.0.2` | `8443` | TypeScript Express REST API |
+| `fastapi.demo.fiscalismia.com` | Demo | `172.20.0.2` | `8444` | Python FastAPI Webscraper |
+| `golang.demo.fiscalismia.com` | Demo | `172.20.0.2` | `8445` | Golang Unified Healthcheck API |
+| `fiscalismia.com` | Production | `172.24.0.3` | `443` | TypeScript React Dashboard |
+| `backend.fiscalismia.com` | Production | `172.24.0.4` | `443` | TypeScript Express REST API |
+| `fastapi.fiscalismia.com` | Production | `172.24.0.4` | `8443` | Python FastAPI Webscraper |
+| `monitoring.fiscalismia.com` | Production | `172.24.0.2` | `443` | Prometheus & Grafana Dashboard |
+| `golang.monitoring.fiscalismia.com` | Production | `172.24.0.2` | `8443` | Golang Unified Healthcheck API |
+
 ### Architecture Overview
 
 This HAProxy instance serves as the central ingress point for all Fiscalismia services, running on a Hetzner Cloud VPS with both public and private network interfaces:
@@ -35,18 +49,6 @@ This HAProxy instance serves as the central ingress point for all Fiscalismia se
   - Production Network (`172.24.0.0/23`)
     - Isolated Subnet for private instances (`172.24.0.0/28`)
     - Exposed Subnet for public instances (`172.24.1.0/29`)
-
-### Loadbalancer Routing Map
-
-| Domain | Target Service | Private IP | Description |
-|--------|---------------|------------|-------------|
-| `fiscalismia.com` | Frontend | `172.24.0.3` | React Fiscalismia Frontend |
-| `backend.fiscalismia.com` | Backend | `172.24.0.4` | Express REST API backend |
-| `fastapi.fiscalismia.com` | FastAPI | `172.24.0.4` | Python FastAPI backend |
-| `demo.fiscalismia.com` | Demo | `172.20.0.2` | Encapsulated Demo instance (frontend) |
-| `backend.demo.fiscalismia.com` | Demo | `172.20.0.2` | Encapsulated Demo instance (backend) |
-| `fastapi.demo.fiscalismia.com` | Demo | `172.20.0.2` | Encapsulated Demo instance (fastapi) |
-| `monitoring.fiscalismia.com` | Monitoring | `172.24.0.2` | Prometheus & Grafana dashboard |
 
 ### Remote testing
 
